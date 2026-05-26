@@ -122,6 +122,9 @@ void MainWindow::setupConnections() {
     //! \brief Соединяет сигнал запроса графика со слотом onShowGraph
 
     connect(taskWin,  &TaskWindow::logoutRequested, this, &MainWindow::onLogout);
+
+    connect(taskWin,  &TaskWindow::setParamsRequested, this, &MainWindow::onSetParamsRequested);
+    connect(taskWin,  &TaskWindow::getParamsRequested, this, &MainWindow::onGetParamsRequested);
     //! \brief Соединяет сигнал выхода из системы со слотом onLogout
 }
 
@@ -379,6 +382,15 @@ void MainWindow::onServerResponse(const QString &response) {
         taskWin->showCheckResult(false);
         //! \brief Показывает в окне задач сообщение о неправильном ответе
 
+    } else if (response == "params+") {
+        taskWin->onParamsApplied(true);
+
+    } else if (response == "params-") {
+        taskWin->onParamsApplied(false);
+
+    } else if (response.startsWith("params&")) {
+        taskWin->loadParams(response);
+
     } else if (response == "connected") {
         //! \brief Обработка сообщения об установке соединения
         statusBar()->showMessage("Соединение установлено.");
@@ -407,4 +419,12 @@ void MainWindow::onNetworkError(const QString &error) {
 
     statusBar()->showMessage("Ошибка: " + error);
     //! \brief Отображает сообщение об ошибке в строке состояния
+}
+
+void MainWindow::onSetParamsRequested(const QString &msg) {
+    TcpClient::getInstance()->sendMessage(msg);
+}
+
+void MainWindow::onGetParamsRequested() {
+    TcpClient::getInstance()->sendMessage("getparams");
 }

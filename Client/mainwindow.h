@@ -100,6 +100,9 @@ private slots:
     //! \brief Слот для обработки события отключения от сервера
 
     void onNetworkError(const QString &error);
+
+    void onSetParamsRequested(const QString &msg);
+    void onGetParamsRequested();
     //! \brief Слот для обработки сетевой ошибки
     //! \param error Текст ошибки
 

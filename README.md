@@ -1,3 +1,4 @@
+# Инструкция по запуску проекта
 # TCP Math Server
 
 > Клиент-серверное приложение для решения математических задач с регистрацией по email, статистикой и визуализацией графиков.
@@ -39,7 +40,7 @@ docker-compose up -d --build
 
 ---
 
-## Требования
+## Необходимое ПО
 
 | Инструмент | Версия | Для чего |
 |---|---|---|
@@ -239,124 +240,11 @@ Totals: 10 passed, 0 failed, 0 skipped
 
 ---
 
-## Генерация документации
-
-```bash
-# Из корневой папки проекта
-cd tcp-math-server
-doxygen Doxyfile
-
-# Открыть документацию
-# Windows:
-start docs\doxygen\html\index.html
-# Linux/macOS:
-xdg-open docs/doxygen/html/index.html
-```
-
-Документация включает описание всех классов, методов и исходный код с подсветкой синтаксиса.
+## Документация
+ Документация Doxygen находиться в папке docs\html
 
 ---
 
-## Структура проекта
 
-```
-tcp-math-server/
-├── docker-compose.yml          # Оркестрация: сервер + MailHog
-├── Doxyfile                    # Конфигурация Doxygen
-├── README.md                   # Этот файл
-│
-├── EchoServer/                 # TCP-сервер (Qt Console)
-│   ├── main.cpp                # Точка входа
-│   ├── mytcpserver.h/cpp       # View: TCP-соединения
-│   ├── functionsforserver.h/cpp# Controller: протокол + математика
-│   ├── database.h/cpp          # Model: SQLite (Singleton)
-│   ├── emailsender.h/cpp       # SMTP через MailHog
-│   ├── echoServer.pro          # Qt-проект
-│   └── Dockerfile              # Docker-образ сервера
-│
-├── Client/                     # Qt GUI-клиент
-│   ├── main.cpp
-│   ├── mainwindow.h/cpp        # Контроллер + навигация
-│   ├── loginwindow.h/cpp       # Экран входа
-│   ├── registerwindow.h/cpp    # Экран регистрации (2 шага)
-│   ├── taskwindow.h/cpp        # Экран задачи и статистики
-│   ├── graphwindow.h/cpp       # Графики (QCustomPlot)
-│   ├── tcpclient.h/cpp         # TCP Singleton
-│   ├── qcustomplot.h/cpp       # Библиотека графиков
-│   └── Client.pro
-│
-├── Tests/                      # Unit-тесты (Qt Test)
-│   ├── tst_funcforserver_test.cpp
-│   └── Tests.pro
-│
-└── docs/                       # Документация
-    ├── WIKI.md
-    ├── TestStrategy.md
-    ├── UML_ClassDiagram.puml
-    └── UseCase.puml
-```
 
----
 
-## Протокол обмена
-
-Все сообщения — текстовые, разделитель `\n`, параметры внутри — `&`.
-
-| Запрос | Ответ (успех) | Ответ (ошибка) |
-|---|---|---|
-| `auth&login&password` | `auth+&login` | `auth-` |
-| `reg&login&password&email` | `reg+&login` | `reg-` |
-| `confirm&login&code` | `confirm+` | `confirm-` |
-| `stat&login` | `stat&N$M&P` | — |
-| `check&task&variant&answer` | `check+` | `check-` |
-| `getparams` | `params&a1&b1&...` | — |
-| `setparams&a1&b1&...` | `params_set+` | `params_set-` |
-
-> `stat&N$M&P` — N правильных, M попыток, P очков
-
----
-
-## Частые проблемы
-
-### `docker-compose up` зависает или падает с ошибкой
-
-- Убедись, что **Docker Desktop запущен** (иконка кита в трее)
-- Windows: проверь, что включена **виртуализация** в BIOS и **WSL 2** установлен
-  ```
-  wsl --install
-  ```
-
-### Клиент не подключается к серверу
-
-- Проверь, что контейнер запущен: `docker-compose ps`
-- Проверь логи: `docker-compose logs server`
-- Убедись, что порт 33333 не занят другим приложением:
-  ```bash
-  # Windows
-  netstat -ano | findstr :33333
-  # Linux/macOS
-  lsof -i :33333
-  ```
-
-### Письмо с кодом не приходит
-
-- Открой **http://localhost:8025** — письмо должно быть там
-- Если MailHog недоступен: `docker-compose logs mailhog`
-- Убедись, что оба контейнера в одной сети: `docker network ls`
-
-### Ошибка сборки Qt Creator: "Kit not found"
-
-- Зайди в `Инструменты` → `Параметры` → `Kits`
-- Проверь, что Qt 6 и компилятор MinGW обнаружены
-- Если нет — переустанови Qt через Qt Online Installer
-
-### Тесты не компилируются
-
-- Убедись, что `Tests/Tests.pro` открыт как **отдельный** проект, а не как часть общего
-- Пути `../EchoServer/` должны быть доступны — `Tests/` должна находиться рядом с `EchoServer/`
-
----
-
-## Лицензия
-
-Учебный проект. Свободное использование в образовательных целях.

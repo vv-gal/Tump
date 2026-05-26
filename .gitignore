@@ -1,0 +1,35 @@
+# Qt build artifacts
+build/
+debug/
+release/
+*.o
+*.a
+*.exe
+Makefile
+moc_*.cpp
+moc_*.h
+ui_*.h
+qrc_*.cpp
+*.user
+.qmake.stash
+object_script.*
+
+# Qt Creator
+*.pro.user
+*.pro.user.*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Doxygen output (сгенерировано, не нужно в git)
+docs/doxygen/
+docs/html/
+
+# SQLite DB (не хранить данные в репозитории)
+*.db
+*.db-journal
+
+# Pending registration files
+pending_*.txt

@@ -1,0 +1,247 @@
+# ==============================================================================
+# Doxyfile — конфигурация Doxygen для проекта TCP Math Server
+# Охватывает: EchoServer (сервер), Client (клиент), Tests (тесты)
+#
+# Запуск:    doxygen Doxyfile
+# Результат: docs/doxygen/html/index.html
+# ==============================================================================
+
+#---------------------------------------------------------------------------
+# Информация о проекте
+#---------------------------------------------------------------------------
+
+PROJECT_NAME           = "TCP Math Server"
+PROJECT_NUMBER         = 1.0
+PROJECT_BRIEF          = "Клиент-серверное Qt-приложение для решения математических задач с регистрацией по email"
+
+# Логотип проекта (опционально — положите файл рядом с Doxyfile)
+# PROJECT_LOGO         = docs/logo.png
+
+OUTPUT_DIRECTORY       = .
+OUTPUT_LANGUAGE        = Russian
+MARKDOWN_SUPPORT       = YES
+AUTOLINK_SUPPORT       = YES
+BUILTIN_STL_SUPPORT    = YES
+
+#---------------------------------------------------------------------------
+# Входные файлы — сервер, клиент, тесты и документация
+#---------------------------------------------------------------------------
+
+# Корневые папки с исходниками (пути относительно расположения Doxyfile)
+INPUT                  = EchoServer \
+                         Client \
+                         Tests
+
+# Рекурсивно обходить подпапки
+RECURSIVE              = YES
+
+# Обрабатываемые расширения файлов
+FILE_PATTERNS          = *.h \
+                         *.cpp \
+                         *.md
+
+# Исключить сборочные папки, сторонние библиотеки и Qt Creator служебные файлы
+EXCLUDE_PATTERNS       = */build/* \
+                         */.qtcreator/* \
+                         */debug/* \
+                         */release/* \
+                         */moc_* \
+                         *qcustomplot.h \
+                         *qcustomplot.cpp
+
+# Исключить конкретные файлы
+EXCLUDE                = Client/qcustomplot.cpp \
+                         Client/qcustomplot.h \
+                         EchoServer/build \
+                         EchoServer/debug \
+                         EchoServer/release \
+                         Client/build \
+                         Client/debug \
+                         Client/release \
+                         Tests/build
+
+#---------------------------------------------------------------------------
+# Что извлекать из кода
+#---------------------------------------------------------------------------
+
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+EXTRACT_ANON_NSPACES   = YES
+HIDE_UNDOC_MEMBERS     = NO
+HIDE_UNDOC_CLASSES     = NO
+HIDE_IN_BODY_DOCS      = NO
+INTERNAL_DOCS          = YES
+CASE_SENSE_NAMES       = YES
+SHOW_INCLUDE_FILES     = YES
+SHOW_GROUPED_MEMB_INC  = YES
+FORCE_LOCAL_INCLUDES   = NO
+INLINE_INFO            = YES
+SORT_MEMBER_DOCS       = NO
+SORT_BRIEF_DOCS        = NO
+SORT_BY_SCOPE_NAME     = NO
+GENERATE_TODOLIST      = YES
+GENERATE_TESTLIST      = YES
+GENERATE_BUGLIST       = YES
+GENERATE_DEPRECATEDLIST= YES
+
+#---------------------------------------------------------------------------
+# Группы модулей — логическое разделение на сервер / клиент / тесты
+# Задаётся через @defgroup в исходниках или через ALIASES ниже
+#---------------------------------------------------------------------------
+
+# Псевдонимы для удобства — чтобы не писать длинные команды в каждом файле
+ALIASES                = "server=\ingroup Server" \
+                         "client=\ingroup Client" \
+                         "tests=\ingroup Tests" \
+                         "protocol=\par Протокол:" \
+                         "thread=\par Потокобезопасность:"
+
+# Группы для главной страницы документации
+# Каждая группа описана через @defgroup в соответствующих .h файлах.
+# Ниже — fallback-описания если в коде их нет.
+
+# ИСПРАВЛЕНО: убрана ссылка на несуществующий файл
+# USE_MDFILE_AS_MAINPAGE = docs/WIKI.md
+
+#---------------------------------------------------------------------------
+# Предобработка — чтобы Qt-макросы разворачивались правильно
+#---------------------------------------------------------------------------
+
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = NO
+SEARCH_INCLUDES        = YES
+
+# Подсказки для парсера по Qt-специфичным макросам
+PREDEFINED             = Q_OBJECT= \
+                         Q_SLOTS= \
+                         Q_SIGNALS= \
+                         signals=protected \
+                         slots= \
+                         emit= \
+                         Q_PROPERTY(x)= \
+                         Q_DECLARE_METATYPE(x)= \
+                         Q_UNUSED(x)= \
+                         Q_DISABLE_COPY(x)=
+
+#---------------------------------------------------------------------------
+# HTML-вывод
+#---------------------------------------------------------------------------
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = docs/html
+HTML_FILE_EXTENSION    = .html
+
+# Тема — тёмная современная (Doxygen Awesome, если установлена)
+# Если не установлена — убери три строки ниже, будет стандартная тема
+# HTML_EXTRA_STYLESHEET  = docs/doxygen-awesome.css
+# HTML_COLORSTYLE        = DARK
+# HTML_COLORSTYLE_HUE    = 220
+
+HTML_COLORSTYLE        = AUTO_DARK
+HTML_DYNAMIC_SECTIONS  = YES
+HTML_INDEX_NUM_ENTRIES = 100
+GENERATE_DOCSET        = NO
+GENERATE_HTMLHELP      = NO
+GENERATE_TREEVIEW      = YES
+FULL_SIDEBAR           = NO
+TREEVIEW_WIDTH         = 270
+EXT_LINKS_IN_WINDOW    = NO
+OBFUSCATE_EMAILS       = YES
+
+# Поиск по документации (работает без сервера, чисто JS)
+SEARCHENGINE           = YES
+SERVER_BASED_SEARCH    = NO
+
+#---------------------------------------------------------------------------
+# LaTeX — отключён (не нужен)
+#---------------------------------------------------------------------------
+
+GENERATE_LATEX         = NO
+
+#---------------------------------------------------------------------------
+# Диаграммы — Graphviz / встроенный dot
+#---------------------------------------------------------------------------
+
+# Если Graphviz установлен (dot есть в PATH) — поставить YES
+HAVE_DOT               = NO
+
+# Если YES и dot установлен — раскомментируй:
+# HAVE_DOT             = YES
+# DOT_NUM_THREADS      = 4
+# CLASS_GRAPH          = YES
+# COLLABORATION_GRAPH  = YES
+# UML_LOOK             = YES
+# UML_LIMIT_NUM_FIELDS = 10
+# INCLUDE_GRAPH        = YES
+# INCLUDED_BY_GRAPH    = YES
+# CALL_GRAPH           = YES
+# CALLER_GRAPH         = YES
+# GRAPHICAL_HIERARCHY  = YES
+# DIRECTORY_GRAPH      = YES
+# DOT_IMAGE_FORMAT     = svg
+# INTERACTIVE_SVG      = YES
+# DOT_GRAPH_MAX_NODES  = 100
+# MAX_DOT_GRAPH_DEPTH  = 5
+# DOT_TRANSPARENT      = YES
+
+# ИСПРАВЛЕНО: CLASS_DIAGRAMS устарел, используем HAVE_DOT
+# CLASS_DIAGRAMS         = YES
+
+#---------------------------------------------------------------------------
+# PlantUML — для вставки UML-диаграмм из .puml файлов в комментариях
+#---------------------------------------------------------------------------
+
+# Если plantuml.jar доступен — раскомментируй и укажи путь:
+# PLANTUML_JAR_PATH    = C:/plantuml/plantuml.jar
+# PLANTUML_INCLUDE_PATH= docs
+
+#---------------------------------------------------------------------------
+# Источники в документации
+#---------------------------------------------------------------------------
+
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+STRIP_CODE_COMMENTS    = NO
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+REFERENCES_LINK_SOURCE = YES
+SOURCE_TOOLTIPS        = YES
+USE_HTAGS              = NO
+VERBATIM_HEADERS       = YES
+
+# Подсветка синтаксиса
+CLANG_ASSISTED_PARSING = NO
+
+#---------------------------------------------------------------------------
+# Индекс и алфавитный указатель
+#---------------------------------------------------------------------------
+
+ALPHABETICAL_INDEX     = YES
+IGNORE_PREFIX          =
+
+#---------------------------------------------------------------------------
+# Разное
+#---------------------------------------------------------------------------
+
+QUIET                  = NO
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+WARN_NO_PARAMDOC       = YES
+WARN_AS_ERROR          = NO
+WARN_FORMAT            = "$file:$line: $text"
+
+# ИСПРАВЛЕНО: WARN_LOGFILE - путь должен существовать
+# WARN_LOGFILE           = docs/doxygen_warnings.log
+
+# Кодировка входных файлов
+INPUT_ENCODING         = UTF-8
+
+# Максимальная глубина вложенности разделов в HTML
+MAX_INITIALIZER_LINES  = 30
+SHOW_USED_FILES        = YES
+SHOW_FILES             = YES
+SHOW_NAMESPACES        = YES

@@ -1,0 +1,245 @@
+\chapter{Инструкция по запуску проекта }
+\hypertarget{md__r_e_a_d_m_e}{}\label{md__r_e_a_d_m_e}\index{Инструкция по запуску проекта@{Инструкция по запуску проекта}}
+\label{md__r_e_a_d_m_e_autotoc_md0}%
+\Hypertarget{md__r_e_a_d_m_e_autotoc_md0}%
+\hypertarget{md__r_e_a_d_m_e_autotoc_md1}{}\doxysection{\texorpdfstring{Tump}{Tump}}\label{md__r_e_a_d_m_e_autotoc_md1}
+\begin{quote}
+Клиент-\/серверное приложение для решения математических задач с регистрацией по email, статистикой и визуализацией графиков. \end{quote}
+
+
+{\bfseries{Стек:\+}} C++ · Qt 6 · SQLite · Docker · Mail\+Hog · Qt Test · Doxygen\hypertarget{md__r_e_a_d_m_e_autotoc_md2}{}\doxysubsection{\texorpdfstring{Быстрый запуск}{Быстрый запуск}}\label{md__r_e_a_d_m_e_autotoc_md2}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\#\ 1.\ Клонировать\ репозиторий}
+\DoxyCodeLine{git\ clone\ https://github.com/vv-\/gal/Tump.git}
+\DoxyCodeLine{}
+\DoxyCodeLine{\#\ 2.\ Поднять\ сервер\ +\ MailHog}
+\DoxyCodeLine{docker-\/compose\ up\ -\/d\ -\/-\/build}
+\DoxyCodeLine{}
+\DoxyCodeLine{\#\ 3.\ Открыть\ клиент\ в\ Qt\ Creator:\ Client/Client.pro\ →\ Run}
+\DoxyCodeLine{}
+\DoxyCodeLine{\#\ 4.\ Письма\ с\ кодами\ подтверждения:\ http://localhost:8025}
+
+\end{DoxyCode}
+
+
+\DoxyHorRuler{0}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md4}{}\doxysubsection{\texorpdfstring{Необходимое ПО}{Необходимое ПО}}\label{md__r_e_a_d_m_e_autotoc_md4}
+
+\begin{DoxyTable}{3}{}{}{1}
+\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Инструмент  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Версия  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Для чего  \\
+\href{https://www.qt.io/download}{\texttt{Qt}}  &6.\+x (минимум 6.\+2)  &Сборка сервера, клиента, тестов  \\
+\href{https://www.docker.com/products/docker-desktop/}{\texttt{Docker Desktop}}  &любая актуальная  &Запуск сервера + Mail\+Hog  \\
+\href{https://git-scm.com/}{\texttt{Git}}  &любая  &Клонирование репозитория  \\
+\href{https://www.doxygen.nl/download.html}{\texttt{Doxygen}} {\itshape (опционально)}  &1.\+9+  &Генерация HTML-\/документации  \\
+\end{DoxyTable}
+
+
+\begin{quote}
+{\bfseries{Windows:\+}} Qt устанавливается через \href{https://www.qt.io/download-qt-installer}{\texttt{Qt Online Installer}}. ~\newline
+ При установке выбрать компоненты:\+ {\ttfamily Qt 6.\+x} → {\ttfamily Min\+GW 64-\/bit} + {\ttfamily Qt Network} + {\ttfamily Qt SQL}. \end{quote}
+
+
+\DoxyHorRuler{0}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md6}{}\doxysubsection{\texorpdfstring{Установка зависимостей}{Установка зависимостей}}\label{md__r_e_a_d_m_e_autotoc_md6}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md7}{}\doxysubsubsection{\texorpdfstring{Windows}{Windows}}\label{md__r_e_a_d_m_e_autotoc_md7}
+
+\begin{DoxyEnumerate}
+\item Скачать и установить {\bfseries{\href{https://www.qt.io/download-qt-installer}{\texttt{Qt Online Installer}}}}
+\item При установке выбрать:\+
+\begin{DoxyItemize}
+\item {\ttfamily Qt 6.\+x for Desktop} → {\ttfamily Min\+GW 64-\/bit}
+\item Дополнительные модули:\+ {\ttfamily Qt Network}, {\ttfamily Qt SQL}, {\ttfamily Qt Test}, {\ttfamily Qt Print\+Support}
+\end{DoxyItemize}
+\item Скачать и установить {\bfseries{\href{https://www.docker.com/products/docker-desktop/}{\texttt{Docker Desktop}}}}
+\item Перезагрузить компьютер после установки Docker
+\end{DoxyEnumerate}\hypertarget{md__r_e_a_d_m_e_autotoc_md8}{}\doxysubsubsection{\texorpdfstring{Linux (Ubuntu/\+\+Debian)}{Linux (Ubuntu/\+\+Debian)}}\label{md__r_e_a_d_m_e_autotoc_md8}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\#\ Qt\ 6}
+\DoxyCodeLine{sudo\ apt\ update}
+\DoxyCodeLine{sudo\ apt\ install\ -\/y\ qt6-\/base-\/dev\ qt6-\/tools-\/dev\ libqt6sql6-\/sqlite\ \(\backslash\)}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ libqt6network6\ build-\/essential}
+\DoxyCodeLine{}
+\DoxyCodeLine{\#\ Docker}
+\DoxyCodeLine{sudo\ apt\ install\ -\/y\ docker.io\ docker-\/compose}
+\DoxyCodeLine{sudo\ usermod\ -\/aG\ docker\ \$USER\ \ \ \#\ чтобы\ не\ писать\ sudo}
+\DoxyCodeLine{newgrp\ docker}
+
+\end{DoxyCode}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md9}{}\doxysubsubsection{\texorpdfstring{mac\+OS}{mac\+OS}}\label{md__r_e_a_d_m_e_autotoc_md9}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{brew\ install\ qt@6\ docker}
+\DoxyCodeLine{export\ PATH="{}/opt/homebrew/opt/qt@6/bin:\$PATH"{}}
+
+\end{DoxyCode}
+
+
+\DoxyHorRuler{0}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md11}{}\doxysubsection{\texorpdfstring{Запуск сервера}{Запуск сервера}}\label{md__r_e_a_d_m_e_autotoc_md11}
+Сервер запускается в Docker вместе с Mail\+Hog одной командой.\hypertarget{md__r_e_a_d_m_e_autotoc_md12}{}\doxysubsubsection{\texorpdfstring{Шаг 1 — убедись, что Docker запущен}{Шаг 1 — убедись, что Docker запущен}}\label{md__r_e_a_d_m_e_autotoc_md12}
+
+\begin{DoxyItemize}
+\item {\bfseries{Windows/\+mac\+OS:\+}} запусти {\bfseries{Docker Desktop}} из меню Start /\+ Launchpad, дождись иконки кита в трее
+\item {\bfseries{Linux:\+}} {\ttfamily sudo systemctl start docker}
+\end{DoxyItemize}\hypertarget{md__r_e_a_d_m_e_autotoc_md13}{}\doxysubsubsection{\texorpdfstring{Шаг 2 — перейди в папку проекта}{Шаг 2 — перейди в папку проекта}}\label{md__r_e_a_d_m_e_autotoc_md13}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{cd\ путь/до/tcp-\/math-\/server}
+
+\end{DoxyCode}
+
+
+\begin{quote}
+{\bfseries{Windows пример:\+}} {\ttfamily cd C:\+\textbackslash{}Users\textbackslash{}Иван\textbackslash{}Documents\textbackslash{}tcp-\/math-\/server} \end{quote}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md14}{}\doxysubsubsection{\texorpdfstring{Шаг 3 — сборка и запуск (первый раз)}{Шаг 3 — сборка и запуск (первый раз)}}\label{md__r_e_a_d_m_e_autotoc_md14}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{docker-\/compose\ up\ -\/d\ -\/-\/build}
+
+\end{DoxyCode}
+
+
+Флаги:\+
+\begin{DoxyItemize}
+\item {\ttfamily -\/-\/build} — пересобрать образ из исходников (нужно при первом запуске или после изменений в коде)
+\item {\ttfamily -\/d} — запустить в фоновом режиме
+\end{DoxyItemize}
+
+Первая сборка занимает {\bfseries{3–7 минут}} (скачивается Ubuntu, устанавливается Qt, компилируется сервер).\hypertarget{md__r_e_a_d_m_e_autotoc_md15}{}\doxysubsubsection{\texorpdfstring{Шаг 4 — последующие запуски (без пересборки)}{Шаг 4 — последующие запуски (без пересборки)}}\label{md__r_e_a_d_m_e_autotoc_md15}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{docker-\/compose\ up\ -\/d}
+
+\end{DoxyCode}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md16}{}\doxysubsubsection{\texorpdfstring{Шаг 5 — проверить, что всё работает}{Шаг 5 — проверить, что всё работает}}\label{md__r_e_a_d_m_e_autotoc_md16}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{docker-\/compose\ ps}
+
+\end{DoxyCode}
+
+
+Ожидаемый вывод — оба контейнера в статусе {\ttfamily Up}:\+
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{NAME\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ STATUS}
+\DoxyCodeLine{mailhog\ \ \ \ \ \ \ \ \ \ \ \ Up}
+\DoxyCodeLine{tcp\_math\_server\ \ \ \ Up}
+
+\end{DoxyCode}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md17}{}\doxysubsubsection{\texorpdfstring{Полезные команды}{Полезные команды}}\label{md__r_e_a_d_m_e_autotoc_md17}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\#\ Логи\ сервера\ в\ реальном\ времени}
+\DoxyCodeLine{docker-\/compose\ logs\ -\/f\ server}
+\DoxyCodeLine{}
+\DoxyCodeLine{\#\ Остановить\ всё}
+\DoxyCodeLine{docker-\/compose\ down}
+\DoxyCodeLine{}
+\DoxyCodeLine{\#\ Остановить\ и\ удалить\ данные\ (БД\ будет\ сброшена!)}
+\DoxyCodeLine{docker-\/compose\ down\ -\/v}
+\DoxyCodeLine{}
+\DoxyCodeLine{\#\ Пересобрать\ после\ изменений\ в\ коде}
+\DoxyCodeLine{docker-\/compose\ up\ -\/d\ -\/-\/build}
+
+\end{DoxyCode}
+
+
+\begin{quote}
+{\bfseries{После перезагрузки компьютера}} Docker Desktop запускается автоматически (если включён автозапуск), а контейнеры поднимаются сами благодаря {\ttfamily restart:\+ unless-\/stopped}. \end{quote}
+
+
+\DoxyHorRuler{0}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md19}{}\doxysubsection{\texorpdfstring{Запуск клиента}{Запуск клиента}}\label{md__r_e_a_d_m_e_autotoc_md19}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md20}{}\doxysubsubsection{\texorpdfstring{Через Qt Creator (рекомендуется)}{Через Qt Creator (рекомендуется)}}\label{md__r_e_a_d_m_e_autotoc_md20}
+
+\begin{DoxyEnumerate}
+\item Открыть {\bfseries{Qt Creator}}
+\item {\ttfamily Файл} → {\ttfamily Открыть файл или проект} → выбрать {\ttfamily Client/\+\+Client.\+pro}
+\item При первом открытии выбрать kit:\+ {\ttfamily Desktop Qt 6.\+x Min\+GW 64-\/bit} → {\bfseries{Настроить проект}}
+\item Нажать ▶ {\bfseries{Run}} (Ctrl+R) или кнопку зелёного треугольника
+\end{DoxyEnumerate}\hypertarget{md__r_e_a_d_m_e_autotoc_md21}{}\doxysubsubsection{\texorpdfstring{Через командную строку}{Через командную строку}}\label{md__r_e_a_d_m_e_autotoc_md21}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{cd\ Client}
+\DoxyCodeLine{qmake\ Client.pro}
+\DoxyCodeLine{make\ \ \ \ \ \ \ \ \ \ \#\ Linux/macOS}
+\DoxyCodeLine{mingw32-\/make\ \ \#\ Windows\ (MinGW)}
+\DoxyCodeLine{./Client\ \ \ \ \ \ \#\ Linux/macOS}
+\DoxyCodeLine{.\(\backslash\)Client.exe\ \ \#\ Windows}
+
+\end{DoxyCode}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md22}{}\doxysubsubsection{\texorpdfstring{Настройка адреса сервера}{Настройка адреса сервера}}\label{md__r_e_a_d_m_e_autotoc_md22}
+По умолчанию клиент подключается к {\ttfamily localhost:\+33333}. ~\newline
+ Если сервер запущен на другой машине — открой {\ttfamily Client/\+mainwindow.\+cpp} и измени строку:\+
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{TcpClient::getInstance()-\/>connectToServer(\textcolor{stringliteral}{"{}localhost"{}},\ 33333);}
+\DoxyCodeLine{\textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ↑\ заменить\ на\ IP\ сервера}}
+
+\end{DoxyCode}
+
+
+\DoxyHorRuler{0}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md24}{}\doxysubsection{\texorpdfstring{Запуск тестов}{Запуск тестов}}\label{md__r_e_a_d_m_e_autotoc_md24}
+Тесты находятся в папке {\ttfamily Tests/\+} и проверяют математические функции и протокол сервера.\hypertarget{md__r_e_a_d_m_e_autotoc_md25}{}\doxysubsubsection{\texorpdfstring{Через Qt Creator}{Через Qt Creator}}\label{md__r_e_a_d_m_e_autotoc_md25}
+
+\begin{DoxyEnumerate}
+\item {\ttfamily Файл} → {\ttfamily Открыть файл или проект} → {\ttfamily Tests/\+\+Tests.\+pro}
+\item Kit:\+ {\ttfamily Desktop Qt 6.\+x Min\+GW 64-\/bit}
+\item Run (Ctrl+R)
+\end{DoxyEnumerate}\hypertarget{md__r_e_a_d_m_e_autotoc_md26}{}\doxysubsubsection{\texorpdfstring{Через командную строку}{Через командную строку}}\label{md__r_e_a_d_m_e_autotoc_md26}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{cd\ Tests}
+\DoxyCodeLine{qmake\ Tests.pro}
+\DoxyCodeLine{make\ \ \ \ \ \ \ \ \ \ \#\ Linux/macOS}
+\DoxyCodeLine{mingw32-\/make\ \ \#\ Windows}
+\DoxyCodeLine{./Tests\ \ \ \ \ \ \ \#\ Linux/macOS}
+\DoxyCodeLine{.\(\backslash\)Tests.exe\ \ \ \#\ Windows}
+
+\end{DoxyCode}
+
+
+Ожидаемый результат:\+
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{PASS\ \ \ :\ FuncForServer\_Test::test\_parsing\_invalid()}
+\DoxyCodeLine{PASS\ \ \ :\ FuncForServer\_Test::test\_parsing\_auth()}
+\DoxyCodeLine{PASS\ \ \ :\ FuncForServer\_Test::test\_computeF\_segment1()}
+\DoxyCodeLine{PASS\ \ \ :\ FuncForServer\_Test::test\_computeF\_segment2()}
+\DoxyCodeLine{PASS\ \ \ :\ FuncForServer\_Test::test\_computeF\_segment3()}
+\DoxyCodeLine{PASS\ \ \ :\ FuncForServer\_Test::test\_bisect\_root1()}
+\DoxyCodeLine{PASS\ \ \ :\ FuncForServer\_Test::test\_bisect\_root2()}
+\DoxyCodeLine{PASS\ \ \ :\ FuncForServer\_Test::test\_bisect\_root3()}
+\DoxyCodeLine{PASS\ \ \ :\ FuncForServer\_Test::test\_checkAnswer\_correct()}
+\DoxyCodeLine{PASS\ \ \ :\ FuncForServer\_Test::test\_checkAnswer\_wrong()}
+\DoxyCodeLine{Totals:\ 10\ passed,\ 0\ failed,\ 0\ skipped}
+
+\end{DoxyCode}
+
+
+\DoxyHorRuler{0}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md28}{}\doxysubsection{\texorpdfstring{Mail\+Hog — просмотр писем}{Mail\+Hog — просмотр писем}}\label{md__r_e_a_d_m_e_autotoc_md28}
+При регистрации нового пользователя сервер отправляет письмо с кодом подтверждения. ~\newline
+ В режиме разработки письма перехватывает {\bfseries{Mail\+Hog}} — он не пересылает их реально.
+
+
+\begin{DoxyEnumerate}
+\item Убедись, что контейнеры запущены ({\ttfamily docker-\/compose up -\/d})
+\item Открой браузер:\+ {\bfseries{\href{http://localhost:8025}{\texttt{http:\+/\+/\+localhost:\+8025}}}}
+\item После регистрации в клиенте письмо появится в списке
+\item Открой письмо, скопируй 6-\/значный код и введи его в клиенте
+\end{DoxyEnumerate}
+
+\DoxyHorRuler{0}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md30}{}\doxysubsection{\texorpdfstring{Документация}{Документация}}\label{md__r_e_a_d_m_e_autotoc_md30}
+Документация Doxygen находиться в папке docs\textbackslash{}html
+
+\DoxyHorRuler{0}
+ 

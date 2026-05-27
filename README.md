@@ -75,16 +75,15 @@ export PATH="/opt/homebrew/opt/qt@6/bin:$PATH"
 
 ### Шаг 1 — убедись, что Docker запущен
 
-- **Windows/macOS:** запусти **Docker Desktop** из меню Start / Launchpad, дождись иконки кита в трее
+- **Windows/macOS:** запусти **Docker Desktop** из меню Start / Launchpad, дождись иконки кита
 - **Linux:** `sudo systemctl start docker`
 
 ### Шаг 2 — перейди в папку проекта
 
 ```bash
-cd путь/до/tcp-math-server
-```
+cd /d/project_timp/project
 
-> **Windows пример:** `cd C:\Users\Иван\Documents\tcp-math-server`
+```
 
 ### Шаг 3 — сборка и запуск (первый раз)
 

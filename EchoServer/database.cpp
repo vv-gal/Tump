@@ -1,243 +1,471 @@
 /*!
  * \file database.cpp
  * \brief Реализация класса DataBase — работа с SQLite через Qt SQL.
+ *
+ * База данных хранится в файле D:/project_timp/project/db/math_server.db
+ * Таблицы создаются только при первом запуске.
  */
 
-#include "database.h"                           //!< Подключение заголовочного файла класса DataBase
-#include <QCryptographicHash>                  //!< Подключение класса для криптографического хеширования (SHA-256)
-#include <QRandomGenerator>                    //!< Подключение класса для генерации случайных чисел
-#include <QFile>                               //!< Подключение класса для работы с файлами
-#include <QTextStream>                         //!< Подключение класса для потокового чтения/записи текста
-#include <QDateTime>                           //!< Подключение класса для работы с датой и временем
+#include "database.h"
+//! \brief Подключение заголовочного файла с объявлением класса DataBase
 
-DataBase *DataBase::p_instance = nullptr;      //!< Инициализация статического указателя на единственный экземпляр класса
-DataBaseDestroyer DataBase::destroyer;         //!< Создание статического объекта для автоматического уничтожения Singleton
+#include <QCryptographicHash>
+//! \brief Подключение класса для криптографического хэширования (SHA-256)
 
-// Деструктор определён здесь, где DataBase уже полностью объявлен
-DataBaseDestroyer::~DataBaseDestroyer() { delete p_instance; }  //!< Деструктор уничтожителя: удаляет экземпляр DataBase
+#include <QRandomGenerator>
+//! \brief Подключение класса для генерации случайных чисел (код подтверждения)
 
-DataBase::DataBase() {}                        //!< Конструктор по умолчанию (приватный для Singleton)
+#include <QFile>
+//! \brief Подключение класса для работы с файлами
 
-DataBase *DataBase::getInstance() {            //!< Статический метод получения единственного экземпляра (Singleton)
-    if (!p_instance) {                         //!< Проверка: существует ли уже экземпляр класса
-        p_instance = new DataBase();           //!< Создание нового экземпляра DataBase
-        destroyer.initialize(p_instance);      //!< Инициализация уничтожителя указателем на созданный экземпляр
+#include <QTextStream>
+//! \brief Подключение класса для текстового ввода/вывода в файлы
+
+#include <QDateTime>
+//! \brief Подключение класса для работы с датой и временем
+
+#include <QProcessEnvironment>
+//! \brief Подключение класса для доступа к переменным окружения
+
+#include <QDir>
+//! \brief Подключение класса для работы с директориями и путями
+
+#include <QFileInfo>
+//! \brief Подключение класса для получения информации о файлах
+
+DataBase *DataBase::p_instance = nullptr;
+//! \brief Инициализация статического указателя на экземпляр класса нулевым значением
+
+DataBaseDestroyer DataBase::destroyer;
+//! \brief Инициализация статического объекта-уничтожителя Singleton
+
+DataBaseDestroyer::~DataBaseDestroyer() { delete p_instance; }
+//! \brief Деструктор уничтожителя
+//! \details Удаляет единственный экземпляр DataBase при завершении программы
+//!          delete p_instance автоматически вызовет деструктор DataBase
+
+DataBase::DataBase() {}
+//! \brief Приватный конструктор Singleton
+//! \details Объект QSqlDatabase создается позже в методе init()
+//!          Конструктор пустой, т.к. подключение к БД требует параметров
+
+DataBase *DataBase::getInstance() {
+    //! \brief Статический метод получения единственного экземпляра класса
+    //! \return Указатель на единственный экземпляр DataBase
+
+    if (!p_instance) {
+        //! \brief Проверяет, существует ли уже экземпляр
+        p_instance = new DataBase();
+        //! \brief Создает новый экземпляр при первом вызове (ленивая инициализация)
+
+        destroyer.initialize(p_instance);
+        //! \brief Передает указатель на экземпляр уничтожителю для автоматического удаления
     }
-    return p_instance;                         //!< Возврат указателя на единственный экземпляр
+
+    return p_instance;
+    //! \brief Возвращает указатель на единственный экземпляр
 }
 
-void DataBase::init() {                        //!< Метод инициализации базы данных
-    db = QSqlDatabase::addDatabase("QSQLITE"); //!< Добавление драйвера SQLite для работы с базой данных
+void DataBase::init() {
+    //! \brief Инициализирует подключение к базе данных SQLite
+    //! \details Создает файл БД при его отсутствии, создает таблицы при первом запуске
 
-    // Путь в /app/data/ — персистентный volume, данные не теряются при перезапуске
-    db.setDatabaseName("server.db");           //!< Установка имени файла базы данных (создаётся в рабочей директории)
+    // Используем SQLite вместо PostgreSQL
+    db = QSqlDatabase::addDatabase("QSQLITE");
+    //! \brief Добавляет новое подключение к БД с драйвером SQLite
 
-    if (!db.open()) {                          //!< Попытка открыть соединение с базой данных
-        qDebug() << "DB open error:" << db.lastError().text();  //!< Вывод сообщения об ошибке открытия БД
-        return;                                //!< Выход из метода при ошибке открытия
+    // База данных в указанной папке
+    QString dbFileName = "D:/project_timp/project/db/math_server.db";
+    //! \brief Полный путь к файлу базы данных
+
+    // Убедимся, что папка существует
+    QDir dir;
+    //! \brief Создает объект для работы с директориями
+
+    QString dbPath = "D:/project_timp/project/db";
+    //! \brief Путь к директории, где будет храниться файл БД
+
+    if (!dir.exists(dbPath)) {
+        //! \brief Проверяет, существует ли директория
+
+        dir.mkpath(dbPath);
+        //! \brief Создает все недостающие директории в пути
+
+        qDebug() << "Created directory:" << dbPath;
+        //! \brief Выводит отладочное сообщение о создании директории
     }
 
-    QSqlQuery query(db);                       //!< Создание объекта SQL-запроса для выполнения команд
+    db.setDatabaseName(dbFileName);
+    //! \brief Устанавливает имя файла базы данных для подключения
 
-    if (!query.exec("CREATE TABLE IF NOT EXISTS Users ("  //!< Выполнение SQL-запроса создания таблицы Users
-                    "login    VARCHAR(50)  NOT NULL PRIMARY KEY,"  //!< Поле логина (первичный ключ)
-                    "password VARCHAR(64)  NOT NULL,"              //!< Поле пароля (хранится хеш SHA-256)
-                    "email    VARCHAR(100) NOT NULL,"              //!< Поле email пользователя
-                    "confirmed INTEGER DEFAULT 0,"                 //!< Поле статуса подтверждения (0 - не подтверждён, 1 - подтверждён)
-                    "conf_code VARCHAR(10) DEFAULT ''"             //!< Поле кода подтверждения (6 цифр)
-                    ")")) {
-        qDebug() << "Failed to create Users table:" << query.lastError().text();  //!< Вывод ошибки создания таблицы Users
+    // Проверяем, существует ли файл базы данных
+    bool dbExists = QFileInfo::exists(dbFileName);
+    //! \brief Проверяет наличие файла БД на диске
+
+    if (!db.open()) {
+        //! \brief Попытка открыть соединение с БД
+
+        qDebug() << "DB open error:" << db.lastError().text();
+        //! \brief Выводит сообщение об ошибке открытия БД
+
+        return;
+        //! \brief Прерывает выполнение функции при ошибке
     }
 
-    if (!query.exec("CREATE TABLE IF NOT EXISTS Stats ("  //!< Выполнение SQL-запроса создания таблицы Stats
-                    "login   VARCHAR(50) NOT NULL,"       //!< Поле логина пользователя
-                    "task    INTEGER NOT NULL,"           //!< Поле номера задачи
-                    "correct INTEGER NOT NULL,"           //!< Поле правильности ответа (0 - неверно, 1 - верно)
-                    "points  INTEGER NOT NULL"            //!< Поле набранных очков (7 за верный ответ, 0 за неверный)
-                    ")")) {
-        qDebug() << "Failed to create Stats table:" << query.lastError().text();  //!< Вывод ошибки создания таблицы Stats
+    // Если база данных только что создана (файла не было) - создаём таблицы
+    if (!dbExists) {
+        //! \brief Проверяет, была ли БД только что создана
+
+        qDebug() << "Creating new database with tables...";
+        //! \brief Выводит отладочное сообщение о создании таблиц
+
+        QSqlQuery query;
+        //! \brief Создает объект для выполнения SQL-запросов
+
+        QString createUsers = R"(
+            CREATE TABLE Users (
+                login     VARCHAR(50)  NOT NULL PRIMARY KEY,
+                password  VARCHAR(64)  NOT NULL,
+                email     VARCHAR(100) NOT NULL,
+                confirmed INTEGER      NOT NULL DEFAULT 0,
+                conf_code VARCHAR(10)  NOT NULL DEFAULT ''
+            )
+        )";
+        //! \brief SQL-запрос для создания таблицы пользователей
+        //! \details Поля:
+        //!   - login: уникальный логин пользователя (первичный ключ)
+        //!   - password: хэш пароля (SHA-256, 64 символа)
+        //!   - email: электронная почта пользователя
+        //!   - confirmed: флаг подтверждения email (0 или 1)
+        //!   - conf_code: код подтверждения (6 цифр)
+
+        QString createStats = R"(
+            CREATE TABLE Stats (
+                login   VARCHAR(50) NOT NULL,
+                task    INTEGER     NOT NULL,
+                correct INTEGER     NOT NULL,
+                points  INTEGER     NOT NULL
+            )
+        )";
+        //! \brief SQL-запрос для создания таблицы статистики
+        //! \details Поля:
+        //!   - login: логин пользователя
+        //!   - task: номер задачи (1, 2 или 3)
+        //!   - correct: 1 - правильный ответ, 0 - неправильный
+        //!   - points: количество набранных очков (7 за правильный ответ)
+
+        if (!query.exec(createUsers)) {
+            //! \brief Выполняет запрос создания таблицы Users
+
+            qDebug() << "Create Users table error:" << query.lastError().text();
+            //! \brief Выводит сообщение об ошибке при создании таблицы
+
+            return;
+            //! \brief Прерывает выполнение функции при ошибке
+        }
+
+        if (!query.exec(createStats)) {
+            //! \brief Выполняет запрос создания таблицы Stats
+
+            qDebug() << "Create Stats table error:" << query.lastError().text();
+            //! \brief Выводит сообщение об ошибке при создании таблицы
+
+            return;
+            //! \brief Прерывает выполнение функции при ошибке
+        }
+
+        qDebug() << "Tables created successfully!";
+        //! \brief Выводит сообщение об успешном создании таблиц
+    } else {
+        qDebug() << "Using existing database:" << dbFileName;
+        //! \brief Выводит сообщение об использовании существующей БД
     }
 
-    qDebug() << "DB initialized OK";           //!< Вывод сообщения об успешной инициализации базы данных
+    qDebug() << "SQLite DB connected OK:" << dbFileName;
+    //! \brief Выводит сообщение об успешном подключении к БД
 }
 
-static QString hashPassword(const QString &pw) {  //!< Вспомогательная функция хеширования пароля
-    return QString(QCryptographicHash::hash(pw.toUtf8(), QCryptographicHash::Sha256).toHex());  //!< Возврат шестнадцатеричной строки хеша SHA-256
+static QString hashPassword(const QString &pw) {
+    //! \brief Вспомогательная функция для хэширования пароля
+    //! \param pw Исходный пароль в открытом виде
+    //! \return Строка с хэшем пароля в шестнадцатеричном формате
+    //! \details Использует алгоритм SHA-256, возвращает 64 символа
+
+    return QString(QCryptographicHash::hash(
+                       pw.toUtf8(), QCryptographicHash::Sha256).toHex());
+    //! \brief Преобразует пароль в UTF-8, вычисляет SHA-256 хэш,
+    //!        конвертирует результат в шестнадцатеричную строку
 }
 
 /*!
  * \brief Регистрирует нового пользователя или обновляет код для незавершённой регистрации.
- *
- * ИСПРАВЛЕНО:
- * 1. Если пользователь существует и уже подтверждён — возвращаем false (логин занят).
- * 2. Если пользователь существует, но ещё НЕ подтверждён — генерируем новый код
- *    и обновляем запись. Это позволяет повторить регистрацию если письмо не пришло.
- * 3. Pending-файл больше НЕ пишется здесь. functionsforserver.cpp читает код
- *    через getConfirmationCode() и сам пишет файл — один код на двоих.
+ * \param login Логин пользователя
+ * \param password Пароль пользователя (будет захэширован)
+ * \param email Email пользователя
+ * \return true - регистрация успешна, false - ошибка или пользователь уже подтвержден
  */
-bool DataBase::registerUser(const QString &login, const QString &password, const QString &email) {  //!< Метод регистрации пользователя
-    // Генерируем новый код
-    QString code = QString::number(QRandomGenerator::global()->bounded(100000, 1000000));  //!< Генерация случайного 6-значного кода подтверждения
+bool DataBase::registerUser(const QString &login,
+                            const QString &password,
+                            const QString &email) {
+    //! \brief Метод регистрации нового пользователя
 
-    if (userExists(login)) {                     //!< Проверка: существует ли пользователь с таким логином
-        // Проверяем — может уже подтверждён?
-        QSqlQuery chk(db);                      //!< Создание объекта запроса для проверки статуса
-        chk.prepare("SELECT confirmed FROM Users WHERE login = :login");  //!< Подготовка SQL-запроса для получения статуса подтверждения
-        chk.bindValue(":login", login);         //!< Привязка значения логина к параметру запроса
-        if (chk.exec() && chk.next() && chk.value(0).toInt() == 1) {  //!< Если запрос выполнен и пользователь подтверждён
-            qDebug() << "User already confirmed:" << login;  //!< Вывод сообщения о подтверждённом пользователе
-            return false;                       //!< Возврат false (логин занят, нельзя перерегистрироваться)
+    QString code = QString::number(
+        QRandomGenerator::global()->bounded(100000, 1000000));
+    //! \brief Генерирует случайный 6-значный код подтверждения
+    //! \details Диапазон: от 100000 до 999999 включительно
+
+    if (userExists(login)) {
+        //! \brief Проверяет, существует ли пользователь с таким логином
+
+        QSqlQuery chk(db);
+        //! \brief Создает запрос для проверки статуса пользователя
+
+        chk.prepare("SELECT confirmed FROM Users WHERE login = :login");
+        //! \brief Подготавливает SQL-запрос с параметром
+
+        chk.bindValue(":login", login);
+        //! \brief Привязывает значение логина к параметру запроса
+
+        if (chk.exec() && chk.next() && chk.value(0).toInt() == 1) {
+            //! \brief Проверяет, подтвержден ли email пользователя
+
+            qDebug() << "User already confirmed:" << login;
+            //! \brief Выводит сообщение о существующем подтвержденном пользователе
+
+            return false;
+            //! \brief Возвращает false - регистрация невозможна
         }
 
-        // Пользователь есть, но не подтверждён — обновляем пароль, email и код
-        QSqlQuery upd(db);                      //!< Создание объекта запроса для обновления данных
-        upd.prepare("UPDATE Users SET password = :password, email = :email, "  //!< Подготовка SQL-запроса обновления
+        QSqlQuery upd(db);
+        //! \brief Создает запрос для обновления данных пользователя
+
+        upd.prepare("UPDATE Users SET password = :password, email = :email, "
                     "conf_code = :code WHERE login = :login");
-        upd.bindValue(":password", hashPassword(password));  //!< Привязка хешированного пароля
-        upd.bindValue(":email",    email);      //!< Привязка email пользователя
-        upd.bindValue(":code",     code);       //!< Привязка нового кода подтверждения
-        upd.bindValue(":login",    login);      //!< Привязка логина пользователя
+        //! \brief Подготавливает запрос обновления пароля, email и кода
 
-        if (!upd.exec()) {                      //!< Проверка успешности выполнения запроса обновления
-            qDebug() << "Failed to update unconfirmed user:" << upd.lastError().text();  //!< Вывод ошибки обновления
-            return false;                       //!< Возврат false при ошибке обновления
+        upd.bindValue(":password", hashPassword(password));
+        //! \brief Сохраняет хэш пароля
+
+        upd.bindValue(":email",    email);
+        //! \brief Обновляет email пользователя
+
+        upd.bindValue(":code",     code);
+        //! \brief Обновляет код подтверждения
+
+        upd.bindValue(":login",    login);
+        //! \brief Указывает логин для WHERE-условия
+
+        if (!upd.exec()) {
+            //! \brief Выполняет запрос обновления
+
+            qDebug() << "Update user error:" << upd.lastError().text();
+            //! \brief Выводит сообщение об ошибке
+
+            return false;
+            //! \brief Возвращает false при ошибке выполнения
         }
-
-        qDebug() << "Re-registered unconfirmed user:" << login << "new code:" << code;  //!< Вывод сообщения о перерегистрации
-        return true;                            //!< Возврат true (успешное обновление)
+        return true;
+        //! \brief Успешное обновление данных незавершенной регистрации
     }
 
-    // Новый пользователь — вставляем
-    QSqlQuery query(db);                        //!< Создание объекта запроса для вставки данных
-    query.prepare("INSERT INTO Users(login, password, email, confirmed, conf_code) "  //!< Подготовка SQL-запроса вставки
-                  "VALUES (:login, :password, :email, 0, :code)");
-    query.bindValue(":login",    login);        //!< Привязка логина
-    query.bindValue(":password", hashPassword(password));  //!< Привязка хешированного пароля
-    query.bindValue(":email",    email);        //!< Привязка email
-    query.bindValue(":code",     code);         //!< Привязка кода подтверждения
+    QSqlQuery ins(db);
+    //! \brief Создает запрос для вставки нового пользователя
 
-    if (!query.exec()) {                        //!< Проверка успешности выполнения запроса вставки
-        qDebug() << "Failed to insert user:" << query.lastError().text();  //!< Вывод ошибки вставки
-        return false;                           //!< Возврат false при ошибке вставки
+    ins.prepare("INSERT INTO Users (login, password, email, confirmed, conf_code) "
+                "VALUES (:login, :password, :email, 0, :code)");
+    //! \brief Подготавливает запрос вставки с начальным статусом confirmed = 0
+
+    ins.bindValue(":login",    login);
+    //! \brief Привязывает логин нового пользователя
+
+    ins.bindValue(":password", hashPassword(password));
+    //! \brief Привязывает хэш пароля
+
+    ins.bindValue(":email",    email);
+    //! \brief Привязывает email пользователя
+
+    ins.bindValue(":code",     code);
+    //! \brief Привязывает код подтверждения
+
+    if (!ins.exec()) {
+        //! \brief Выполняет запрос вставки
+
+        qDebug() << "Insert user error:" << ins.lastError().text();
+        //! \brief Выводит сообщение об ошибке
+
+        return false;
+        //! \brief Возвращает false при ошибке выполнения
     }
-
-    qDebug() << "Registered new user:" << login << "code:" << code;  //!< Вывод сообщения об успешной регистрации
-    return true;                                //!< Возврат true (успешная регистрация)
+    return true;
+    //! \brief Успешная регистрация нового пользователя
 }
 
-/*!
- * \brief Возвращает код подтверждения из БД.
- * Используется в functionsforserver.cpp, чтобы не генерировать второй код.
- */
-QString DataBase::getConfirmationCode(const QString &login) {  //!< Метод получения кода подтверждения из БД
-    QSqlQuery query(db);                        //!< Создание объекта запроса
-    query.prepare("SELECT conf_code FROM Users WHERE login = :login");  //!< Подготовка SQL-запроса для получения кода
-    query.bindValue(":login", login);           //!< Привязка логина пользователя
+bool DataBase::authUser(const QString &login, const QString &password) {
+    //! \brief Аутентифицирует пользователя по логину и паролю
+    //! \param login Логин пользователя
+    //! \param password Пароль пользователя (в открытом виде)
+    //! \return true - аутентификация успешна, false - неверные данные или email не подтвержден
 
-    if (!query.exec() || !query.next()) {       //!< Проверка выполнения запроса и наличия результата
-        qDebug() << "getConfirmationCode: user not found:" << login;  //!< Вывод сообщения о ненайденном пользователе
-        return QString();                       //!< Возврат пустой строки при ошибке
-    }
+    QSqlQuery q(db);
+    //! \brief Создает объект для выполнения SQL-запроса
 
-    return query.value(0).toString();           //!< Возврат кода подтверждения из первого поля результата
+    q.prepare("SELECT password, confirmed FROM Users WHERE login = :login");
+    //! \brief Подготавливает запрос выборки пароля и статуса подтверждения
+
+    q.bindValue(":login", login);
+    //! \brief Привязывает логин к параметру запроса
+
+    if (!q.exec() || !q.next()) return false;
+    //! \brief Выполняет запрос, возвращает false если пользователь не найден
+
+    return q.value(0).toString() == hashPassword(password)
+           && q.value(1).toInt() == 1;
+    //! \brief Проверяет совпадение хэша пароля и факт подтверждения email
 }
 
-bool DataBase::authUser(const QString &login, const QString &password) {  //!< Метод авторизации пользователя
-    QSqlQuery query(db);                        //!< Создание объекта запроса
-    query.prepare("SELECT password, confirmed FROM Users WHERE login = :login");  //!< Подготовка SQL-запроса для получения хеша и статуса
-    query.bindValue(":login", login);           //!< Привязка логина пользователя
+bool DataBase::confirmEmail(const QString &login, const QString &code) {
+    //! \brief Подтверждает email пользователя по коду
+    //! \param login Логин пользователя
+    //! \param code Код подтверждения
+    //! \return true - код верный и email подтвержден, false - код неверный
 
-    if (!query.exec()) {                        //!< Проверка успешности выполнения запроса
-        qDebug() << "Auth query failed:" << query.lastError().text();  //!< Вывод ошибки выполнения запроса
-        return false;                           //!< Возврат false при ошибке запроса
-    }
-    if (!query.next()) {                        //!< Проверка наличия пользователя в БД
-        qDebug() << "User not found:" << login; //!< Вывод сообщения об отсутствии пользователя
-        return false;                           //!< Возврат false (пользователь не найден)
-    }
+    QSqlQuery q(db);
+    //! \brief Создает запрос для проверки кода
 
-    QString storedHash = query.value(0).toString();  //!< Получение сохранённого хеша пароля
-    int confirmed      = query.value(1).toInt();     //!< Получение статуса подтверждения email
+    q.prepare("SELECT conf_code FROM Users WHERE login = :login");
+    //! \brief Подготавливает запрос получения кода подтверждения
 
-    bool passwordMatch = (storedHash == hashPassword(password));  //!< Сравнение хеша введённого пароля с сохранённым
-    bool isConfirmed   = (confirmed == 1);          //!< Проверка, подтверждён ли email
+    q.bindValue(":login", login);
+    //! \brief Привязывает логин
 
-    if (!passwordMatch)  qDebug() << "Wrong password for:" << login;  //!< Вывод сообщения о неверном пароле
-    else if (!isConfirmed) qDebug() << "Email not confirmed for:" << login;  //!< Вывод сообщения о неподтверждённом email
+    if (!q.exec() || !q.next()) return false;
+    //! \brief Возвращает false, если пользователь не найден
 
-    return passwordMatch && isConfirmed;            //!< Возврат true только если пароль верен И email подтверждён
+    if (q.value(0).toString() != code) return false;
+    //! \brief Сравнивает введенный код с сохраненным в БД
+
+    QSqlQuery upd(db);
+    //! \brief Создает запрос для обновления статуса
+
+    upd.prepare("UPDATE Users SET confirmed = 1 WHERE login = :login");
+    //! \brief Подготавливает запрос установки флага confirmed
+
+    upd.bindValue(":login", login);
+    //! \brief Привязывает логин пользователя
+
+    return upd.exec();
+    //! \brief Выполняет обновление и возвращает результат
 }
 
-bool DataBase::confirmEmail(const QString &login, const QString &code) {  //!< Метод подтверждения email по коду
-    QSqlQuery query(db);                        //!< Создание объекта запроса
-    query.prepare("SELECT conf_code FROM Users WHERE login = :login");  //!< Подготовка SQL-запроса для получения кода
-    query.bindValue(":login", login);           //!< Привязка логина пользователя
+void DataBase::saveResult(const QString &login, int taskNum, bool correct) {
+    //! \brief Сохраняет результат решения задачи
+    //! \param login Логин пользователя
+    //! \param taskNum Номер задачи (1, 2 или 3)
+    //! \param correct true - ответ правильный, false - неправильный
+    //! \details За правильный ответ начисляется 7 очков
 
-    if (!query.exec() || !query.next()) {       //!< Проверка выполнения запроса и наличия результата
-        qDebug() << "User not found for confirmation:" << login;  //!< Вывод сообщения о ненайденном пользователе
-        return false;                           //!< Возврат false (пользователь не найден)
-    }
+    int pts = correct ? 7 : 0;
+    //! \brief Определяет количество очков (7 за правильный ответ, 0 за неправильный)
 
-    QString storedCode = query.value(0).toString();  //!< Получение сохранённого кода из БД
+    QSqlQuery ins(db);
+    //! \brief Создает запрос для вставки статистики
 
-    if (storedCode != code) {                   //!< Проверка соответствия введённого кода сохранённому
-        qDebug() << "Wrong confirmation code for:" << login  //!< Вывод сообщения о неверном коде
-                 << "expected:" << storedCode << "got:" << code;
-        return false;                           //!< Возврат false (код не совпадает)
-    }
+    ins.prepare("INSERT INTO Stats (login, task, correct, points) "
+                "VALUES (:login, :task, :correct, :points)");
+    //! \brief Подготавливает запрос вставки записи о попытке
 
-    QSqlQuery upd(db);                          //!< Создание объекта запроса для обновления
-    upd.prepare("UPDATE Users SET confirmed = 1 WHERE login = :login");  //!< Подготовка SQL-запроса установки статуса
-    upd.bindValue(":login", login);             //!< Привязка логина пользователя
+    ins.bindValue(":login",   login);
+    //! \brief Привязывает логин пользователя
 
-    if (upd.exec()) {                           //!< Проверка успешности выполнения обновления
-        qDebug() << "Email confirmed for:" << login;  //!< Вывод сообщения об успешном подтверждении
-        return true;                            //!< Возврат true (успешное подтверждение)
-    }
+    ins.bindValue(":task",    taskNum);
+    //! \brief Привязывает номер задачи
 
-    qDebug() << "Failed to update confirmation:" << upd.lastError().text();  //!< Вывод ошибки обновления статуса
-    return false;                               //!< Возврат false при ошибке обновления
+    ins.bindValue(":correct", correct ? 1 : 0);
+    //! \brief Привязывает флаг правильности (1 или 0)
+
+    ins.bindValue(":points",  pts);
+    //! \brief Привязывает количество начисленных очков
+
+    if (!ins.exec())
+        //! \brief Выполняет запрос вставки
+
+        qDebug() << "saveResult error:" << ins.lastError().text();
+    //! \brief Выводит сообщение об ошибке при неудачном выполнении
 }
 
-void DataBase::saveResult(const QString &login, int taskNum, bool correct) {  //!< Метод сохранения результата решения задачи
-    QSqlQuery query(db);                        //!< Создание объекта запроса
-    query.prepare("INSERT INTO Stats(login, task, correct, points) "  //!< Подготовка SQL-запроса вставки результата
-                  "VALUES (:login, :task, :correct, :points)");
-    query.bindValue(":login",   login);         //!< Привязка логина пользователя
-    query.bindValue(":task",    taskNum);       //!< Привязка номера задачи
-    query.bindValue(":correct", correct ? 1 : 0);  //!< Привязка статуса правильности (1 - верно, 0 - неверно)
-    query.bindValue(":points",  correct ? 7 : 0);  //!< Привязка набранных очков (7 за верный ответ, 0 за неверный)
+QString DataBase::getStats(const QString &login) {
+    //! \brief Получает статистику пользователя
+    //! \param login Логин пользователя
+    //! \return Строка в формате "правильные$всего&очки"
+    //! \details Пример: "5$10&35" - 5 правильных из 10 попыток, 35 очков
 
-    if (!query.exec())                          //!< Проверка успешности выполнения запроса
-        qDebug() << "Failed to save result:" << query.lastError().text();  //!< Вывод ошибки сохранения
-    else
-        qDebug() << "Saved result for" << login << "task" << taskNum << "correct:" << correct;  //!< Вывод сообщения об успешном сохранении
+    QSqlQuery q(db);
+    //! \brief Создает запрос для получения статистики
+
+    q.prepare("SELECT "
+              "  SUM(correct) AS correct_count, "
+              "  COUNT(*)     AS total_count, "
+              "  SUM(points)  AS total_points "
+              "FROM Stats WHERE login = :login");
+    //! \brief Подготавливает агрегирующий запрос:
+    //!   - SUM(correct) - количество правильных ответов
+    //!   - COUNT(*) - общее количество попыток
+    //!   - SUM(points) - сумма набранных очков
+
+    q.bindValue(":login", login);
+    //! \brief Привязывает логин пользователя
+
+    if (!q.exec() || !q.next()) return "0$0&0";
+    //! \brief Возвращает нулевую статистику при ошибке или отсутствии данных
+
+    int correct = q.value(0).toInt();
+    //! \brief Получает количество правильных ответов
+
+    int total   = q.value(1).toInt();
+    //! \brief Получает общее количество попыток
+
+    int points  = q.value(2).toInt();
+    //! \brief Получает сумму очков
+
+    return QString("%1$%2&%3").arg(correct).arg(total).arg(points);
+    //! \brief Формирует строку статистики в нужном формате
 }
 
-QString DataBase::getStats(const QString &login) {  //!< Метод получения статистики пользователя
-    QSqlQuery query(db);                        //!< Создание объекта запроса
-    query.prepare("SELECT COUNT(*), SUM(correct), SUM(points) FROM Stats WHERE login = :login");  //!< Подготовка SQL-запроса агрегации статистики
-    query.bindValue(":login", login);           //!< Привязка логина пользователя
+bool DataBase::userExists(const QString &login) {
+    //! \brief Проверяет существование пользователя в БД
+    //! \param login Логин пользователя
+    //! \return true - пользователь существует, false - не найден
 
-    if (!query.exec() || !query.next())         //!< Проверка выполнения запроса и наличия результата
-        return "stat&0$0&0";                   //!< Возврат строки с нулевой статистикой при ошибке
+    QSqlQuery q(db);
+    //! \brief Создает запрос для проверки существования
 
-    int total   = query.value(0).toInt();       //!< Получение общего количества попыток
-    int correct = query.value(1).toInt();       //!< Получение количества правильных ответов
-    int points  = query.value(2).toInt();       //!< Получение суммы набранных очков
+    q.prepare("SELECT 1 FROM Users WHERE login = :login");
+    //! \brief Подготавливает запрос (SELECT 1 - легковесная проверка)
 
-    return QString("stat&%1$%2&%3").arg(correct).arg(total).arg(points);  //!< Форматирование строки статистики в формате "stat&правильные$всего&очки"
+    q.bindValue(":login", login);
+    //! \brief Привязывает логин
+
+    return q.exec() && q.next();
+    //! \brief Возвращает true, если запрос выполнен и есть хотя бы одна запись
 }
 
-bool DataBase::userExists(const QString &login) {  //!< Метод проверки существования пользователя
-    QSqlQuery query(db);                        //!< Создание объекта запроса
-    query.prepare("SELECT COUNT(*) FROM Users WHERE login = :login");  //!< Подготовка SQL-запроса подсчёта пользователей
-    query.bindValue(":login", login);           //!< Привязка логина пользователя
+QString DataBase::getConfirmationCode(const QString &login) {
+    //! \brief Получает код подтверждения для пользователя
+    //! \param login Логин пользователя
+    //! \return Код подтверждения или пустую строку, если пользователь не найден
 
-    if (!query.exec()) {                        //!< Проверка успешности выполнения запроса
-        qDebug() << "userExists query failed:" << query.lastError().text();  //!< Вывод ошибки выполнения запроса
-        return false;                           //!< Возврат false при ошибке запроса
-    }
+    QSqlQuery q(db);
+    //! \brief Создает запрос для получения кода
 
-    return query.next() && query.value(0).toInt() > 0;  //!< Возврат true если количество пользователей > 0
+    q.prepare("SELECT conf_code FROM Users WHERE login = :login");
+    //! \brief Подготавливает запрос выборки кода подтверждения
+
+    q.bindValue(":login", login);
+    //! \brief Привязывает логин пользователя
+
+    if (!q.exec() || !q.next()) return QString();
+    //! \brief Возвращает пустую строку при ошибке или отсутствии пользователя
+
+    return q.value(0).toString();
+    //! \brief Возвращает код подтверждения из БД
 }

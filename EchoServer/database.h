@@ -6,11 +6,10 @@
 
 /*!
  * \file database.h
- * \brief Заголовочный файл класса DataBase — работа с PostgreSQL.
+ * \brief Заголовочный файл класса DataBase — работа с SQLite.
  *
- * БД работает в отдельном Docker-контейнере (сервис db).
- * Параметры подключения читаются из переменных окружения:
- *   DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
+ * БД хранится в файле /app/data/math_server.db (смонтированный Docker volume).
+ * Таблицы создаются автоматически при первом запуске.
  */
 
 #include <QObject>
@@ -65,16 +64,15 @@ public:
 };
 
 /*! \class DataBase
- *  \brief Singleton-класс для работы с PostgreSQL базой данных.
+ *  \brief Singleton-класс для работы с SQLite базой данных.
  *
- *  Параметры подключения берутся из переменных окружения при вызове init().
- *  База данных живёт в отдельном контейнере и не зависит от сервера.
+ *  База данных хранится в файле /app/data/math_server.db (Docker volume).
  *
  *  Реализует паттерн Singleton для обеспечения единственного экземпляра
  *  подключения к базе данных на всё приложение.
  */
 class DataBase : public QObject {
-    //! \brief Класс для работы с базой данных PostgreSQL (Singleton)
+    //! \brief Класс для работы с базой данных SQLite (Singleton)
     //! \details Обеспечивает единое подключение к БД для всего серверного приложения
 
     Q_OBJECT
@@ -90,7 +88,7 @@ private:
     //! \details Гарантирует корректное освобождение памяти при завершении программы
 
     QSqlDatabase db;
-    //! \brief Объект подключения к базе данных PostgreSQL
+    //! \brief Объект подключения к базе данных SQLite
     //! \details Содержит параметры подключения и управляет соединением
 
     DataBase();
@@ -123,13 +121,9 @@ public:
      */
     static DataBase *getInstance();
 
-    /*! \brief Инициализирует подключение к PostgreSQL (читает env-переменные).
-     *  \details Читает параметры подключения из переменных окружения:
-     *           - DB_HOST: хост PostgreSQL (по умолчанию "localhost")
-     *           - DB_PORT: порт PostgreSQL (по умолчанию "5432")
-     *           - DB_NAME: имя базы данных (по умолчанию "mathserver")
-     *           - DB_USER: пользователь БД (по умолчанию "mathuser")
-     *           - DB_PASSWORD: пароль пользователя (по умолчанию "mathpass")
+    /*! \brief Инициализирует подключение к SQLite базе данных.
+     *  \details Открывает файл /app/data/math_server.db.
+     *           При первом запуске (файл отсутствует) создаёт таблицы Users и Stats.
      *  \warning Должен быть вызван перед любыми другими операциями с БД
      */
     void init();

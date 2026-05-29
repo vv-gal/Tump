@@ -1,12 +1,10 @@
-version: '3.8'
-
 services:
   mailhog:
     image: mailhog/mailhog:latest
     container_name: mailhog
     ports:
-      - "1025:1025"   # SMTP (для сервера)
-      - "8025:8025"   # Web UI: http://localhost:8025
+      - "1025:1025"
+      - "8025:8025"
     restart: unless-stopped
     networks:
       - app_network
@@ -17,7 +15,7 @@ services:
     ports:
       - "33333:33333"
     volumes:
-      - db_data:/app/data
+      - ./db/math_server.db:/app/math_server.db
     depends_on:
       - mailhog
     restart: unless-stopped
@@ -27,6 +25,3 @@ services:
 networks:
   app_network:
     driver: bridge
-
-volumes:
-  db_data:

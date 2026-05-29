@@ -21,9 +21,6 @@ HEADERS += \
 
 TARGET = EchoServer
 
-# Пути к PostgreSQL (MSYS2)
-INCLUDEPATH += C:/msys64/mingw64/include
-LIBS += -LC:/msys64/mingw64/lib -lpq
 
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
